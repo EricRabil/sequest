@@ -10,6 +10,10 @@ function connectOpts<T extends object>(opts: T): Omit<T, "host"> {
   return Object.keys(opts).filter(key => key !== 'host').reduce((a,c) => a[c] = (opts as any)[c], {} as any);
 }
 
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  return Object.entries(obj).filter(entry => entry[0] !== 'host').reduce((a,[key,value]) => a[key as keyof T] = value, {} as T);
+}
+
 export interface ConnectionOptions extends ssh.ConnectConfig {
   proxy?: ConnectionOptions;
 }
@@ -87,7 +91,7 @@ export class Connection extends EventEmitter {
           proxiedSession.on('error', this.emit.bind(this, 'error'));
           resolve(proxiedSession);
         });
-        proxiedSession.connect(this.proxyOpts!);
+        proxiedSession.connect(omit(this.proxyOpts!, ["host", "proxy"]));
       });
     });
   }

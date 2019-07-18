@@ -59,6 +59,12 @@ function copy(obj) {
 function connectOpts(opts) {
     return Object.keys(opts).filter(function (key) { return key !== 'host'; }).reduce(function (a, c) { return a[c] = opts[c]; }, {});
 }
+function omit(obj, keys) {
+    return Object.entries(obj).filter(function (entry) { return entry[0] !== 'host'; }).reduce(function (a, _a) {
+        var key = _a[0], value = _a[1];
+        return a[key] = value;
+    }, {});
+}
 var Connection = /** @class */ (function (_super) {
     __extends(Connection, _super);
     function Connection(options) {
@@ -143,7 +149,7 @@ var Connection = /** @class */ (function (_super) {
                     proxiedSession.on('error', _this.emit.bind(_this, 'error'));
                     resolve(proxiedSession);
                 });
-                proxiedSession.connect(_this.proxyOpts);
+                proxiedSession.connect(omit(_this.proxyOpts, ["host", "proxy"]));
             });
         });
     };
